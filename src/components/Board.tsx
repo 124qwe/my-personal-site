@@ -372,15 +372,7 @@ export function Board({ initial }: { initial: AppState }) {
                 >
                   翻账本
                 </button>
-                {isHer && entries.length === 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => commit("/api/demo", { method: "POST" }, "示例账本已载入")}
-                    className="rounded-xl px-3 py-3 text-[13px] text-ink-3 underline decoration-dotted underline-offset-4"
-                  >
-                    先看个示例账本
-                  </button>
-                ) : null}
+
               </div>
             </Reveal>
           </div>
@@ -707,31 +699,20 @@ export function Board({ initial }: { initial: AppState }) {
 
                 <div className="mt-4 flex flex-col gap-2">
                   {isHer ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDraft({
-                            herName: couple.herName,
-                            hisName: couple.hisName,
-                            wishCost: String(couple.wishCost),
-                          });
-                          setSheet("settings");
-                        }}
-                        className="btn-hard rounded-xl bg-[#fffaf1] py-3 font-display text-[16px] text-ink"
-                      >
-                        账本设置
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          commit("/api/demo", { method: "POST" }, "示例账本已载入")
-                        }
-                        className="rounded-xl border-2 border-ink/20 py-2.5 text-[13px] text-ink-2"
-                      >
-                        载入示例账本
-                      </button>
-                    </>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDraft({
+                          herName: couple.herName,
+                          hisName: couple.hisName,
+                          wishCost: String(couple.wishCost),
+                        });
+                        setSheet("settings");
+                      }}
+                      className="btn-hard rounded-xl bg-[#fffaf1] py-3 font-display text-[16px] text-ink"
+                    >
+                      账本设置
+                    </button>
                   ) : null}
                   <button
                     type="button"
@@ -803,7 +784,7 @@ export function Board({ initial }: { initial: AppState }) {
                   <span className="text-[11.5px] text-ink-3">危险区：清空所有贴画与愿望</span>
                   <button
                     type="button"
-                    onClick={() => commit("/api/demo", { method: "DELETE" }, "账本已清空")}
+                    onClick={() => commit("/api/reset", { method: "DELETE" }, "账本已清空")}
                     className="rounded-lg border-2 border-berry/60 px-2.5 py-1 text-[11.5px] text-berry-deep"
                   >
                     清空账本

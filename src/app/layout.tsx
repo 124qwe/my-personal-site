@@ -6,12 +6,20 @@ export const metadata: Metadata = {
   title: "贴画铺子 · 我们的小账本",
   description:
     "情侣专属的贴画奖罚账本：一次最多奖励 5 张贴画，也能扣除，每笔都写明原因和时间。攒够 20 张就能许一个愿望。",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    title: "贴画铺子",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
   themeColor: "#fdf3e4",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

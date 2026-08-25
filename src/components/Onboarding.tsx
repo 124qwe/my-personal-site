@@ -211,7 +211,7 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
             ))}
           </div>
           <p className="mt-4 text-center text-[12px] leading-relaxed text-ink-3">
-            数据只属于你们两个人 · 打开网页就能用，不用装 App
+            数据只属于你们两个人
           </p>
         </Reveal>
       </div>
