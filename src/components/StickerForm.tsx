@@ -67,10 +67,16 @@ export function StickerForm({
     >
       <header className="flex items-center gap-3">
         <span
-          className="sticker shrink-0"
-          style={{ width: 42, height: 42, fontSize: 20 }}
+          className="sticker shrink-0 overflow-hidden bg-white/70"
+          style={{ width: 42, height: 42 }}
         >
-          {isAward ? "🎉" : "✂️"}
+          <img
+            src={isAward ? "/hellokitty/17.jpg" : "/hellokitty/16.jpg"}
+            alt={isAward ? "奖励贴画" : "扣除贴画"}
+            width={42}
+            height={42}
+            className="h-full w-full object-cover"
+          />
         </span>
         <div className="min-w-0">
           <h3 className="font-display text-[21px] leading-tight">

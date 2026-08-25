@@ -307,7 +307,7 @@ export function Board({ initial }: { initial: AppState }) {
 
       <main className="mx-auto max-w-[1180px] px-4 sm:px-6">
         {/* 英雄区 */}
-        <section className="grid grid-cols-2 gap-4 py-7 sm:gap-6 sm:py-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center">
+        <section className="grid items-stretch gap-4 py-7 sm:gap-6 sm:py-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
           <div className="min-w-0">
             <Reveal>
               <div className="flex flex-wrap items-center gap-2">
@@ -386,19 +386,28 @@ export function Board({ initial }: { initial: AppState }) {
             </Reveal>
           </div>
 
-          <Reveal delay={120} className="min-w-0">
-            {/* 移动端右侧:Hello Kitty 装饰图 */}
-            <div className="relative overflow-hidden rounded-2xl border-2 border-ink/85 bg-white/60 lg:hidden">
+          <Reveal delay={120} className="flex min-w-0 self-stretch">
+            {/* 移动端右侧:Hello Kitty 装饰图(铺满整列高度,避免右侧空) */}
+            <div className="relative h-full min-h-[260px] w-full overflow-hidden rounded-2xl border-2 border-ink/85 bg-white/60 lg:hidden">
               <img
                 src="/hellokitty/10.jpg"
                 alt="Hello Kitty"
                 width={520}
                 height={320}
-                className="block h-auto w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              {/* 给图片加一个柔和的渐变蒙版,让左上的标题更突出 */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(90deg,rgba(253,243,228,0.55) 0%,rgba(253,243,228,0.18) 28%,transparent 55%)",
+                }}
               />
             </div>
             {/* 桌面端:许愿进度 */}
-            <div className="hidden lg:block">
+            <div className="hidden h-full w-full lg:block">
               <StickerBook
                 available={summary.available}
                 wishCost={summary.wishCost}
