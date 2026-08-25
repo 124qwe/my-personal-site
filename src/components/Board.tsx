@@ -192,6 +192,16 @@ export function Board({ initial }: { initial: AppState }) {
     }
   };
 
+  const copyOwnerKey = async () => {
+    if (!couple.ownerKey) return;
+    try {
+      await navigator.clipboard.writeText(couple.ownerKey);
+      pushToast("登录码已复制，自己留着别外传", "ok");
+    } catch {
+      pushToast(`你的登录码是 ${couple.ownerKey}`, "bad");
+    }
+  };
+
   /* ---------------- 派生 ---------------- */
 
   const wall = useMemo(() => {
@@ -401,6 +411,13 @@ export function Board({ initial }: { initial: AppState }) {
                     <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-2">
                       他用这个邀请码加入后，你们看到的是同一本账。
                       他只能许愿，发贴画的权限只在你手上。
+                      {couple.ownerKey ? (
+                        <>
+                          <br />
+                          你自己换设备请用设置里的
+                          <strong className="text-berry">登录码 {couple.ownerKey}</strong>。
+                        </>
+                      ) : null}
                     </p>
                   </div>
                   <div className="text-center">
@@ -643,19 +660,44 @@ export function Board({ initial }: { initial: AppState }) {
                 </p>
 
                 {isHer ? (
-                  <div className="mt-4 rounded-xl border-2 border-dashed border-ink/25 bg-paper-2/50 p-3.5 text-center">
-                    <p className="text-[12px] text-ink-3">邀请码</p>
-                    <p className="num my-1 text-[30px] font-bold tracking-[0.3em] text-ink">
-                      {couple.code}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={copyInvite}
-                      className="btn-hard w-full rounded-lg bg-ink py-2 text-[13px] text-paper"
-                    >
-                      复制邀请链接
-                    </button>
-                  </div>
+                  <>
+                    <div className="mt-4 rounded-xl border-2 border-dashed border-ink/25 bg-paper-2/50 p-3.5 text-center">
+                      <p className="text-[12px] text-ink-3">给他的邀请码</p>
+                      <p className="num my-1 text-[30px] font-bold tracking-[0.3em] text-ink">
+                        {couple.code}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={copyInvite}
+                        className="btn-hard w-full rounded-lg bg-ink py-2 text-[13px] text-paper"
+                      >
+                        复制邀请链接
+                      </button>
+                    </div>
+
+                    {couple.ownerKey ? (
+                      <div className="mt-3 rounded-xl border-2 border-berry/35 bg-berry/5 p-3.5 text-center">
+                        <p className="text-[12px] font-medium text-berry-deep">
+                          🔐 你的登录码（换手机 / 平板用）
+                        </p>
+                        <p className="num my-1 text-[30px] font-bold tracking-[0.3em] text-berry-deep">
+                          {couple.ownerKey}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={copyOwnerKey}
+                          className="btn-hard w-full rounded-lg bg-berry py-2 text-[13px] text-[#fff8ee]"
+                        >
+                          复制登录码
+                        </button>
+                        <p className="mt-2 text-[11.5px] leading-relaxed text-ink-3">
+                          在新设备上选「用邀请码」，输入这个码，身份还是管理员。
+                          <strong className="text-berry-deep">别发给他</strong>，
+                          否则他也能发贴画了。
+                        </p>
+                      </div>
+                    ) : null}
+                  </>
                 ) : (
                   <div className="mt-4 rounded-xl border-2 border-dashed border-ink/25 bg-paper-2/50 p-3.5 text-[13px] leading-relaxed text-ink-2">
                     你的权限：查看账本、查看贴画墙、攒够 {summary.wishCost} 张后许愿。

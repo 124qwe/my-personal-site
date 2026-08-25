@@ -12,7 +12,10 @@ export type Role = "her" | "his";
 /** 一对情侣 = 一个共享账本 */
 export const couples = pgTable("couples", {
   id: uuid("id").primaryKey().defaultRandom(),
+  /** 给他的邀请码 */
   code: text("code").notNull().unique(),
+  /** 她自己的登录码：换手机 / 平板时用这个进，身份仍是「她」 */
+  ownerKey: text("owner_key").notNull().default(""),
   herName: text("her_name").notNull().default("她"),
   hisName: text("his_name").notNull().default("他"),
   wishCost: integer("wish_cost").notNull().default(20),

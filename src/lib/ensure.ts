@@ -9,11 +9,23 @@ const DDL = `
 CREATE TABLE IF NOT EXISTS couples (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   code        text NOT NULL UNIQUE,
+  owner_key   text NOT NULL DEFAULT '',
   her_name    text NOT NULL DEFAULT '她',
   his_name    text NOT NULL DEFAULT '他',
   wish_cost   integer NOT NULL DEFAULT 20,
   created_at  timestamptz NOT NULL DEFAULT now()
 );
+
+-- 老库升级：补上她的登录码字段
+ALTER TABLE couples ADD COLUMN IF NOT EXISTS owner_key text NOT NULL DEFAULT '';
+
+-- 给历史账本自动补一个登录码（只补空的，不动已有的）
+UPDATE couples
+SET owner_key = upper(substr(md5(random()::text || id::text), 1, 6))
+WHERE owner_key = '';
+
+CREATE UNIQUE INDEX IF NOT EXISTS couples_owner_key_uq
+  ON couples (owner_key) WHERE owner_key <> '';
 
 CREATE TABLE IF NOT EXISTS members (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),

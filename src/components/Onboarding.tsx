@@ -86,7 +86,7 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
               {(
                 [
                   { key: "create", label: "我是她 · 开账本", icon: "🎀" },
-                  { key: "join", label: "我是他 · 用邀请码", icon: "🔑" },
+                  { key: "join", label: "用码进入 · 换设备", icon: "🔑" },
                 ] as const
               ).map((t) => (
                 <button
@@ -136,11 +136,15 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
               ) : (
                 <>
                   <p className="text-[13px] leading-relaxed text-ink-2">
-                    输入她给你的邀请码，就能看见同一本账。
-                    <strong className="text-dye">你负责攒贴画和许愿</strong>，发贴画的权限在她手上。
+                    输入 6 位码进入同一本账。
+                    <strong className="text-dye">他用邀请码</strong>进来负责攒贴画和许愿；
+                    <strong className="text-berry">她用自己的登录码</strong>进来还是管理员，
+                    可以在手机、平板上同时用。
                   </p>
                   <label className="block">
-                    <span className="text-[12.5px] font-medium text-ink-2">邀请码</span>
+                    <span className="text-[12.5px] font-medium text-ink-2">
+                      邀请码 / 登录码
+                    </span>
                     <input
                       value={code}
                       maxLength={8}
@@ -151,7 +155,9 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
                     />
                   </label>
                   <label className="block">
-                    <span className="text-[12.5px] font-medium text-ink-2">你的昵称</span>
+                    <span className="text-[12.5px] font-medium text-ink-2">
+                      你的昵称<span className="text-ink-3">（她登录时可留空）</span>
+                    </span>
                     <input
                       value={nickname}
                       maxLength={12}
@@ -186,7 +192,7 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
                   ? "正在开门…"
                   : mode === "create"
                     ? "创建我们的小账本"
-                    : "加入她的账本"}
+                    : "进入账本"}
               </button>
             </div>
           </div>

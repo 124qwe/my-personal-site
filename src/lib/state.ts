@@ -72,10 +72,16 @@ export async function computeSummary(couple: Couple): Promise<Summary> {
   };
 }
 
-export function toCoupleDTO(c: Couple, partnerJoined: boolean): CoupleDTO {
+export function toCoupleDTO(
+  c: Couple,
+  partnerJoined: boolean,
+  role?: "her" | "his",
+): CoupleDTO {
   return {
     id: c.id,
     code: c.code,
+    // 她的登录码只发给她自己，他那边拿不到
+    ownerKey: role === "her" ? c.ownerKey : null,
     herName: c.herName,
     hisName: c.hisName,
     wishCost: c.wishCost,
@@ -125,7 +131,7 @@ export async function getState(
       createdAt: w.createdAt.toISOString(),
       resolvedAt: w.resolvedAt ? w.resolvedAt.toISOString() : null,
     })),
-    couple: toCoupleDTO(couple, partnerJoined),
+    couple: toCoupleDTO(couple, partnerJoined, me.role),
     me,
     summary,
   };

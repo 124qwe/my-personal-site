@@ -28,6 +28,8 @@ export type WishDTO = {
 export type CoupleDTO = {
   id: string;
   code: string;
+  /** 她的登录码，只有她自己能看到；他那边是 null */
+  ownerKey: string | null;
   herName: string;
   hisName: string;
   wishCost: number;
