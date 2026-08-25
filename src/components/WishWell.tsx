@@ -83,8 +83,14 @@ export function WishWell({
           style={{ background: "radial-gradient(circle,#d99a2b,transparent 70%)" }}
         />
         <div className="mb-3 flex items-center gap-2">
-          <span className="sticker" style={{ width: 40, height: 40, fontSize: 19 }}>
-            🧞
+          <span className="sticker overflow-hidden bg-white/70" style={{ width: 40, height: 40 }}>
+            <img
+              src="/hellokitty/14.jpg"
+              alt="许愿池"
+              width={40}
+              height={40}
+              className="h-full w-full object-cover"
+            />
           </span>
           <div>
             <h3 className="font-display text-[21px] leading-tight">许愿池</h3>

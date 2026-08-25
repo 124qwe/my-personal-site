@@ -231,24 +231,24 @@ export function Board({ initial }: { initial: AppState }) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   const stats = [
-    { label: "累计奖励", value: summary.awarded, unit: "张", color: "#a92a44", icon: "🎉" },
-    { label: "累计扣除", value: summary.deducted, unit: "张", color: "#2f4b7c", icon: "✂️" },
-    { label: "本周奖励", value: summary.weekAwarded, unit: "张", color: "#2f7a6b", icon: "📅" },
-    { label: "兑现愿望", value: summary.grantedWishes, unit: "个", color: "#8a5a12", icon: "✅" },
+    { label: "累计奖励", value: summary.awarded, unit: "张", color: "#a92a44", icon: "/hellokitty/17.jpg" },
+    { label: "累计扣除", value: summary.deducted, unit: "张", color: "#2f4b7c", icon: "/hellokitty/16.jpg" },
+    { label: "本周奖励", value: summary.weekAwarded, unit: "张", color: "#2f7a6b", icon: "/hellokitty/20.jpg" },
+    { label: "兑现愿望", value: summary.grantedWishes, unit: "个", color: "#8a5a12", icon: "/hellokitty/4.jpg" },
   ];
 
   const dock = isHer
     ? [
-        { id: "desk", label: "发贴画", icon: "🎉" },
-        { id: "ledger", label: "账本", icon: "🗒️" },
-        { id: "wish", label: "许愿池", icon: "🌠" },
-        { id: "__menu", label: "更多", icon: "🫧" },
+        { id: "desk", label: "发贴画", icon: "/hellokitty/19.jpg" },
+        { id: "ledger", label: "账本", icon: "/hellokitty/6.jpg" },
+        { id: "wish", label: "许愿池", icon: "/hellokitty/8.jpg" },
+        { id: "__menu", label: "更多", icon: "/hellokitty/5.png" },
       ]
     : [
-        { id: "__top", label: "首页", icon: "💌" },
-        { id: "ledger", label: "账本", icon: "🗒️" },
-        { id: "wish", label: "许愿", icon: "🌠" },
-        { id: "__menu", label: "更多", icon: "🫧" },
+        { id: "__top", label: "首页", icon: "/hellokitty/19.jpg" },
+        { id: "ledger", label: "账本", icon: "/hellokitty/6.jpg" },
+        { id: "wish", label: "许愿", icon: "/hellokitty/8.jpg" },
+        { id: "__menu", label: "更多", icon: "/hellokitty/5.png" },
       ];
 
   return (
@@ -260,8 +260,17 @@ export function Board({ initial }: { initial: AppState }) {
       {/* 顶栏 */}
       <header className="sticky top-0 z-40 border-b-2 border-ink/90 bg-paper/92 backdrop-blur-sm">
         <div className="mx-auto flex max-w-[1180px] items-center gap-2.5 px-4 py-2.5 sm:px-6">
-          <span className="sticker animate-wobble" style={{ width: 34, height: 34, fontSize: 17 }}>
-            💌
+          <span
+            className="sticker animate-wobble overflow-hidden bg-white"
+            style={{ width: 34, height: 34 }}
+          >
+            <img
+              src="/hellokitty/9.png"
+              alt="Hello Kitty"
+              width={34}
+              height={34}
+              className="h-full w-full object-cover"
+            />
           </span>
           <div className="min-w-0 leading-tight">
             <h1 className="font-display text-[18px] text-ink sm:text-[21px]">贴画铺子</h1>
@@ -298,8 +307,8 @@ export function Board({ initial }: { initial: AppState }) {
 
       <main className="mx-auto max-w-[1180px] px-4 sm:px-6">
         {/* 英雄区 */}
-        <section className="grid gap-5 py-7 sm:py-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center">
-          <div>
+        <section className="grid grid-cols-2 gap-4 py-7 sm:gap-6 sm:py-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center">
+          <div className="min-w-0">
             <Reveal>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-2 rounded-full border-2 border-ink/85 bg-[#fffaf1] px-3 py-1 text-[12px] font-medium text-ink-2">
@@ -377,12 +386,25 @@ export function Board({ initial }: { initial: AppState }) {
             </Reveal>
           </div>
 
-          <Reveal delay={120}>
-            <StickerBook
-              available={summary.available}
-              wishCost={summary.wishCost}
-              icons={iconPool}
-            />
+          <Reveal delay={120} className="min-w-0">
+            {/* 移动端右侧:Hello Kitty 装饰图 */}
+            <div className="relative overflow-hidden rounded-2xl border-2 border-ink/85 bg-white/60 lg:hidden">
+              <img
+                src="/hellokitty/10.jpg"
+                alt="Hello Kitty"
+                width={520}
+                height={320}
+                className="block h-auto w-full object-cover"
+              />
+            </div>
+            {/* 桌面端:许愿进度 */}
+            <div className="hidden lg:block">
+              <StickerBook
+                available={summary.available}
+                wishCost={summary.wishCost}
+                icons={iconPool}
+              />
+            </div>
           </Reveal>
         </section>
 
@@ -435,8 +457,14 @@ export function Board({ initial }: { initial: AppState }) {
           {stats.map((s, i) => (
             <Reveal key={s.label} delay={i * 70}>
               <div className="card-soft flex items-center gap-3 p-3.5">
-                <span className="sticker shrink-0" style={{ width: 36, height: 36, fontSize: 17 }}>
-                  {s.icon}
+                <span className="sticker shrink-0 overflow-hidden bg-white/60" style={{ width: 36, height: 36 }}>
+                  <img
+                    src={s.icon}
+                    alt={s.label}
+                    width={36}
+                    height={36}
+                    className="h-full w-full object-cover"
+                  />
                 </span>
                 <div className="min-w-0">
                   <div className="flex items-baseline gap-1">
@@ -622,9 +650,20 @@ export function Board({ initial }: { initial: AppState }) {
                 if (item.id === "__top") return window.scrollTo({ top: 0, behavior: "smooth" });
                 scrollTo(item.id);
               }}
-              className="flex flex-col items-center gap-0.5 py-2.5 text-[11px] text-ink-2 active:bg-paper-2"
+              className="flex flex-col items-center gap-1 py-2 text-[11px] text-ink-2 active:bg-paper-2"
             >
-              <span style={{ fontSize: 18 }}>{item.icon}</span>
+              <span
+                className="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white/70"
+                style={{ width: 28, height: 28 }}
+              >
+                <img
+                  src={item.icon}
+                  alt={item.label}
+                  width={28}
+                  height={28}
+                  className="h-full w-full object-cover"
+                />
+              </span>
               {item.label}
             </button>
           ))}
