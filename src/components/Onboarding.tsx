@@ -68,8 +68,17 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
       <div className="mx-auto flex min-h-dvh max-w-[460px] flex-col justify-center px-5 py-10">
         <Reveal>
           <div className="mb-6 flex items-center gap-3">
-            <span className="sticker animate-wobble" style={{ width: 52, height: 52, fontSize: 26 }}>
-              💌
+            <span
+              className="sticker animate-wobble overflow-hidden bg-white"
+              style={{ width: 52, height: 52 }}
+            >
+              <img
+                src="/hellokitty/9.png"
+                alt="Hello Kitty"
+                width={52}
+                height={52}
+                className="h-full w-full object-cover"
+              />
             </span>
             <div>
               <h1 className="font-display text-[30px] leading-none text-ink">贴画铺子</h1>
