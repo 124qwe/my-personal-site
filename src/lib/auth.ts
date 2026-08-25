@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { and, eq, gt } from "drizzle-orm";
 import { db } from "@/db";
 import { couples, members, sessions } from "@/db/schema";
@@ -27,10 +27,18 @@ export async function issueSession(
   const token = randomBytes(24).toString("base64url");
   const expiresAt = new Date(Date.now() + TTL_DAYS * 86400 * 1000);
   await db.insert(sessions).values({ token, coupleId, memberId, role, expiresAt });
+  // 线上走 HTTPS 时自动加 Secure；本地 http 调试保持可用
+  const h = await headers();
+  const proto = h.get("x-forwarded-proto") ?? "";
+  const secure =
+    process.env.COOKIE_SECURE === "1" ||
+    proto.split(",")[0].trim() === "https";
+
   const store = await cookies();
   store.set(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
+    secure,
     path: "/",
     expires: expiresAt,
   });
@@ -56,6 +64,14 @@ export async function getSession(): Promise<Session | null> {
   const store = await cookies();
   const token = store.get(COOKIE_NAME)?.value;
   if (!token) return null;
+
+  // 首次访问自动建表，解决“输完名字点创建提示没成功”
+  try {
+    const { ensureTables } = await import("@/lib/ensure");
+    await ensureTables();
+  } catch {
+    // 建表失败让后面的查询去抛更具体的错
+  }
 
   const rows = await db
     .select({

@@ -1,8 +1,9 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
-import { bad, isHer, respond, unauthorized } from "@/lib/http";
+import { bad, handleDbError, isHer, respond, unauthorized } from "@/lib/http";
 import { db } from "@/db";
 import { stickerEntries, wishes } from "@/db/schema";
+import { ensureTables } from "@/lib/ensure";
 
 export const dynamic = "force-dynamic";
 
@@ -35,51 +36,61 @@ const SAMPLE: Array<{
 ];
 
 export async function POST() {
-  const s = await getSession();
-  if (!s) return unauthorized();
-  if (!isHer(s)) return bad("只有她能载入示例账本", 403);
+  try {
+    await ensureTables();
+    const s = await getSession();
+    if (!s) return unauthorized();
+    if (!isHer(s)) return bad("只有她能载入示例账本", 403);
 
-  const existing = await db
-    .select({ id: stickerEntries.id })
-    .from(stickerEntries)
-    .where(eq(stickerEntries.coupleId, s.coupleId))
-    .limit(1);
-  if (existing[0]) return bad("账本里已经有记录了，不用示例啦");
+    const existing = await db
+      .select({ id: stickerEntries.id })
+      .from(stickerEntries)
+      .where(eq(stickerEntries.coupleId, s.coupleId))
+      .limit(1);
+    if (existing[0]) return bad("账本里已经有记录了，不用示例啦");
 
-  const now = Date.now();
-  await db.insert(stickerEntries).values(
-    SAMPLE.map((x) => ({
+    const now = Date.now();
+    await db.insert(stickerEntries).values(
+      SAMPLE.map((x) => ({
+        coupleId: s.coupleId,
+        actorRole: s.role,
+        kind: x.kind,
+        amount: x.amount,
+        icon: x.icon,
+        label: x.label,
+        reason: x.reason,
+        createdAt: new Date(now - x.hoursAgo * 3600 * 1000),
+      })),
+    );
+
+    await db.insert(wishes).values({
       coupleId: s.coupleId,
-      actorRole: s.role,
-      kind: x.kind,
-      amount: x.amount,
-      icon: x.icon,
-      label: x.label,
-      reason: x.reason,
-      createdAt: new Date(now - x.hoursAgo * 3600 * 1000),
-    })),
-  );
+      ownerRole: "his",
+      title: "一整天的自由游戏日",
+      detail: "从早到晚不许催我，饭我自己解决",
+      cost: s.couple.wishCost,
+      status: "granted",
+      note: "答应啦，记得别熬太晚",
+      resolvedAt: new Date(now - 5 * 3600 * 1000),
+    });
 
-  await db.insert(wishes).values({
-    coupleId: s.coupleId,
-    ownerRole: "his",
-    title: "一整天的自由游戏日",
-    detail: "从早到晚不许催我，饭我自己解决",
-    cost: s.couple.wishCost,
-    status: "granted",
-    note: "答应啦，记得别熬太晚",
-    resolvedAt: new Date(now - 5 * 3600 * 1000),
-  });
-
-  return respond(s);
+    return await respond(s);
+  } catch (err) {
+    return handleDbError(err) ?? (() => { throw err; })();
+  }
 }
 
 export async function DELETE() {
-  const s = await getSession();
-  if (!s) return unauthorized();
-  if (!isHer(s)) return bad("只有她能清空账本", 403);
+  try {
+    await ensureTables();
+    const s = await getSession();
+    if (!s) return unauthorized();
+    if (!isHer(s)) return bad("只有她能清空账本", 403);
 
-  await db.delete(wishes).where(eq(wishes.coupleId, s.coupleId));
-  await db.delete(stickerEntries).where(eq(stickerEntries.coupleId, s.coupleId));
-  return respond(s);
+    await db.delete(wishes).where(eq(wishes.coupleId, s.coupleId));
+    await db.delete(stickerEntries).where(eq(stickerEntries.coupleId, s.coupleId));
+    return await respond(s);
+  } catch (err) {
+    return handleDbError(err) ?? (() => { throw err; })();
+  }
 }

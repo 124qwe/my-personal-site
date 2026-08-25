@@ -16,12 +16,14 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
   const [nickname, setNickname] = useState("");
   const [busy, setBusy] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [lastError, setLastError] = useState<string | null>(null);
 
-  const toast = (text: string, tone: Toast["tone"] = "bad") =>
+  const pushToast = (text: string, tone: Toast["tone"] = "bad") =>
     setToasts([{ id: Date.now(), text, tone }]);
 
   const submit = async () => {
     setBusy(true);
+    setLastError(null);
     try {
       const res = await fetch("/api/couple", {
         method: "POST",
@@ -32,11 +34,27 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
             : { mode, code: code.trim(), nickname: nickname.trim() },
         ),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || "没成功，再试一次");
+
+      // 尝试解析 JSON，失败则读文本
+      let data: any = {};
+      let text = "";
+      try {
+        data = await res.clone().json();
+      } catch {
+        text = await res.text().catch(() => "");
+      }
+
+      if (!res.ok) {
+        const msg = data?.error || text?.slice(0, 200) || `请求失败 ${res.status}`;
+        throw new Error(msg);
+      }
       router.refresh();
     } catch (e) {
-      toast(e instanceof Error ? e.message : "没成功，再试一次");
+      const msg = e instanceof Error ? e.message : "没成功，再试一次";
+      setLastError(msg);
+      pushToast(msg);
+      // 控制台也打一份，方便你 F12 看
+      console.error("[创建失败]", e);
     } finally {
       setBusy(false);
     }
@@ -144,6 +162,19 @@ export function Onboarding({ inviteCode = "" }: { inviteCode?: string }) {
                   </label>
                 </>
               )}
+
+              {lastError ? (
+                <div className="rounded-xl bg-berry/10 px-3 py-2.5 text-[12.5px] leading-relaxed text-berry-deep">
+                  <p className="font-medium">创建失败：{lastError}</p>
+                  {lastError.includes("DATABASE_URL") || lastError.includes("表还没建") ? (
+                    <p className="mt-1 text-[11.5px] text-ink-2">
+                      本地请先：<code className="rounded bg-black/10 px-1">cp .env.example .env</code>{" "}
+                      然后 <code className="rounded bg-black/10 px-1">docker compose up -d</code> 再{" "}
+                      <code className="rounded bg-black/10 px-1">node scripts/bootstrap-db.mjs</code>
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
               <button
                 type="button"
