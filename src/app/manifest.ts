@@ -1,27 +1,31 @@
 import type { MetadataRoute } from "next";
 
-export const dynamic = "force-static";
-
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "贴画铺子 · 我们的小账本",
-    short_name: "贴画铺子",
-    description: "情侣专属的贴画奖罚账本，攒够贴画就能许愿。",
+    name: "咕嘟星球｜私密喝水监督小站",
+    short_name: "咕嘟星球",
+    description: "把关心装进每一杯水。只有你们两个人的私密喝水监督与互动小站。",
     start_url: "/",
     display: "standalone",
+    background_color: "#fbf7ef",
+    theme_color: "#153946",
     orientation: "portrait",
-    background_color: "#fdf3e4",
-    theme_color: "#ff8fab",
     icons: [
       {
-        src: "/icon",
+        src: "/icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/icon-512.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/apple-icon",
-        sizes: "180x180",
+        src: "/apple-touch-icon.png",
+        sizes: "1024x1024",
         type: "image/png",
       },
     ],

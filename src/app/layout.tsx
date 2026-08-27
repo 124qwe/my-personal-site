@@ -1,43 +1,45 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from '@vercel/analytics/next';
 import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "贴画铺子 · 我们的小账本",
-  description:
-    "情侣专属的贴画奖罚账本：一次最多奖励 5 张贴画，也能扣除，每笔都写明原因和时间。攒够 20 张就能许一个愿望。",
-  manifest: "/manifest.webmanifest",
+  title: "咕嘟星球｜只有两个人的喝水监督小站",
+  description: "把关心装进每一杯水。咕嘟星球是专属于两个人的私密喝水监督与互动空间。",
+  applicationName: "咕嘟星球",
   appleWebApp: {
     capable: true,
-    title: "贴画铺子",
+    title: "咕嘟星球",
     statusBarStyle: "default",
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "1024x1024", type: "image/png" },
+    ],
+    shortcut: "/icon-192.png",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fdf3e4",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   viewportFit: "cover",
+  themeColor: "#fbf7ef",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@300;400;500;700;900&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="paper-grain antialiased">{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

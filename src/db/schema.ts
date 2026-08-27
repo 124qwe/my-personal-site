@@ -1,104 +1,161 @@
 import {
+  boolean,
+  index,
   integer,
   pgTable,
   text,
   timestamp,
   uniqueIndex,
   uuid,
+  varchar,
 } from "drizzle-orm/pg-core";
 
-export type Role = "her" | "his";
+const timestamps = {
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+};
 
-/** 一对情侣 = 一个共享账本 */
-export const couples = pgTable("couples", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  /** 给他的邀请码 */
-  code: text("code").notNull().unique(),
-  /** 她自己的登录码：换手机 / 平板时用这个进，身份仍是「她」 */
-  ownerKey: text("owner_key").notNull().default(""),
-  herName: text("her_name").notNull().default("她"),
-  hisName: text("his_name").notNull().default("他"),
-  wishCost: integer("wish_cost").notNull().default(20),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const pairs = pgTable(
+  "pairs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    code: varchar("code", { length: 16 }).notNull(),
+    codeUsedAt: timestamp("code_used_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [uniqueIndex("pairs_code_unique").on(table.code)],
+);
 
-/** 账本里的成员：邀请方固定 her，被邀请方固定 his */
 export const members = pgTable(
   "members",
   {
-    id: uuid("id").primaryKey().defaultRandom(),
-    coupleId: uuid("couple_id")
+    id: uuid("id").defaultRandom().primaryKey(),
+    pairId: uuid("pair_id")
       .notNull()
-      .references(() => couples.id, { onDelete: "cascade" }),
-    role: text("role", { enum: ["her", "his"] }).notNull(),
-    nickname: text("nickname").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+      .references(() => pairs.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 12 }).notNull(),
+    nickname: varchar("nickname", { length: 40 }).notNull(),
+    token: varchar("token", { length: 96 }).notNull(),
+    ...timestamps,
   },
-  (t) => [uniqueIndex("members_couple_role_uq").on(t.coupleId, t.role)],
+  (table) => [
+    uniqueIndex("members_token_unique").on(table.token),
+    uniqueIndex("members_pair_role_unique").on(table.pairId, table.role),
+  ],
 );
 
-/** 登录会话（httpOnly cookie 里只放 token） */
-export const sessions = pgTable("sessions", {
-  token: text("token").primaryKey(),
-  coupleId: uuid("couple_id")
-    .notNull()
-    .references(() => couples.id, { onDelete: "cascade" }),
-  memberId: uuid("member_id")
-    .notNull()
-    .references(() => members.id, { onDelete: "cascade" }),
-  role: text("role", { enum: ["her", "his"] }).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-});
+export const tasks = pgTable(
+  "tasks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pairId: uuid("pair_id")
+      .notNull()
+      .references(() => pairs.id, { onDelete: "cascade" }),
+    cups: integer("cups").default(1).notNull(),
+    ml: integer("ml").notNull(),
+    loveNote: text("love_note"),
+    miniTask: text("mini_task"),
+    emoji: varchar("emoji", { length: 16 }).default("💧").notNull(),
+    kind: varchar("kind", { length: 16 }).default("manual").notNull(),
+    status: varchar("status", { length: 24 }).default("pending_accept").notNull(),
+    acceptDeadline: timestamp("accept_deadline", { withTimezone: true }).notNull(),
+    finishDeadline: timestamp("finish_deadline", { withTimezone: true }),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    startPhotoUrl: text("start_photo_url"),
+    endPhotoUrl: text("end_photo_url"),
+    rejectReason: text("reject_reason"),
+    failReason: text("fail_reason"),
+    ...timestamps,
+  },
+  (table) => [
+    index("tasks_pair_created_idx").on(table.pairId, table.createdAt),
+    index("tasks_pair_status_idx").on(table.pairId, table.status),
+  ],
+);
 
-/** 贴画流水 */
-export const stickerEntries = pgTable("sticker_entries", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  coupleId: uuid("couple_id")
-    .notNull()
-    .references(() => couples.id, { onDelete: "cascade" }),
-  actorRole: text("actor_role", { enum: ["her", "his"] })
-    .notNull()
-    .default("her"),
-  kind: text("kind", { enum: ["award", "deduct"] }).notNull(),
-  amount: integer("amount").notNull(),
-  icon: text("icon").notNull(),
-  label: text("label").notNull(),
-  reason: text("reason").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export const dropsLedger = pgTable(
+  "drops_ledger",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pairId: uuid("pair_id")
+      .notNull()
+      .references(() => pairs.id, { onDelete: "cascade" }),
+    delta: integer("delta").notNull(),
+    reason: text("reason").notNull(),
+    taskId: uuid("task_id").references(() => tasks.id, { onDelete: "set null" }),
+    ...timestamps,
+  },
+  (table) => [index("drops_pair_created_idx").on(table.pairId, table.createdAt)],
+);
 
-/** 愿望 */
-export const wishes = pgTable("wishes", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  coupleId: uuid("couple_id")
-    .notNull()
-    .references(() => couples.id, { onDelete: "cascade" }),
-  ownerRole: text("owner_role", { enum: ["her", "his"] })
-    .notNull()
-    .default("his"),
-  title: text("title").notNull(),
-  detail: text("detail"),
-  cost: integer("cost").notNull().default(20),
-  status: text("status", { enum: ["open", "granted", "declined"] })
-    .notNull()
-    .default("open"),
-  note: text("note"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
-});
+export const medals = pgTable(
+  "medals",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pairId: uuid("pair_id")
+      .notNull()
+      .references(() => pairs.id, { onDelete: "cascade" }),
+    delta: integer("delta").notNull(),
+    reason: text("reason").notNull(),
+    taskId: uuid("task_id").references(() => tasks.id, { onDelete: "set null" }),
+    ...timestamps,
+  },
+  (table) => [index("medals_pair_created_idx").on(table.pairId, table.createdAt)],
+);
 
-export type Couple = typeof couples.$inferSelect;
-export type Member = typeof members.$inferSelect;
-export type StickerEntry = typeof stickerEntries.$inferSelect;
-export type Wish = typeof wishes.$inferSelect;
+export const rewards = pgTable(
+  "rewards",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pairId: uuid("pair_id")
+      .notNull()
+      .references(() => pairs.id, { onDelete: "cascade" }),
+    title: varchar("title", { length: 120 }).notNull(),
+    description: text("description"),
+    emoji: varchar("emoji", { length: 16 }).default("🎁").notNull(),
+    cost: integer("cost").default(20).notNull(),
+    active: boolean("active").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [index("rewards_pair_active_idx").on(table.pairId, table.active)],
+);
+
+export const redemptions = pgTable(
+  "redemptions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pairId: uuid("pair_id")
+      .notNull()
+      .references(() => pairs.id, { onDelete: "cascade" }),
+    rewardId: uuid("reward_id")
+      .notNull()
+      .references(() => rewards.id, { onDelete: "restrict" }),
+    rewardTitle: varchar("reward_title", { length: 120 }).notNull(),
+    cost: integer("cost").notNull(),
+    status: varchar("status", { length: 16 }).default("pending").notNull(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [index("redemptions_pair_created_idx").on(table.pairId, table.createdAt)],
+);
+
+export const cheers = pgTable(
+  "cheers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    pairId: uuid("pair_id")
+      .notNull()
+      .references(() => pairs.id, { onDelete: "cascade" }),
+    text: text("text").notNull(),
+    emoji: varchar("emoji", { length: 16 }).default("💕").notNull(),
+    ...timestamps,
+  },
+  (table) => [index("cheers_pair_created_idx").on(table.pairId, table.createdAt)],
+);
+
+export type Task = typeof tasks.$inferSelect;
+export type Reward = typeof rewards.$inferSelect;
+export type Redemption = typeof redemptions.$inferSelect;
+export type Cheer = typeof cheers.$inferSelect;
